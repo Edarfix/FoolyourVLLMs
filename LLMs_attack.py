@@ -286,7 +286,6 @@ def eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=0, permute_
 
 
 def load_model(args, engine):
-    print('HIER WE GO', engine, args)
     if engine == 'llama':
         model_name = "meta-llama/Llama-3.2-1B"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -392,6 +391,9 @@ def main(args):
         print("\n\n")
 
 if __name__ == "__main__":
+    print(torch.cuda.is_available())
+    print(torch.__version__)  # Check PyTorch version
+    print(torch.version.cuda)
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", "-k", type=int, default=0)
     parser.add_argument("--data_dir", "-d", type=str, default="data/MMLU")
