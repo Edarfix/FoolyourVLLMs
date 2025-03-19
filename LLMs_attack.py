@@ -293,10 +293,19 @@ def load_model(args, engine):
         model_name = "google/gemma-3-1b-pt"
         tokenizer = GemmaTokenizer.from_pretrained(model_name)
         model = GemmaForCausalLM.from_pretrained(model_name)
-    if engine == 'qwen':
+    if engine == 'qwen1':
         model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
+    if engine == 'qwen2':
+        model_name = "Qwen/Qwen2.5-VL-3B-Instruct"
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name)
+    if engine == 'qwen3':
+        model_name = "Qwen/Qwen2.5-VL-7B-Instruct"
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name)
+
     if engine == 'llama2-7b':
         tokenizer = transformers.LlamaTokenizer.from_pretrained('meta-llama/Llama-2-7b-hf', load_in_8bit=args.load_in_8bit)
         model = transformers.LlamaForCausalLM.from_pretrained('meta-llama/Llama-2-7b-hf', load_in_8bit=args.load_in_8bit)
@@ -398,7 +407,7 @@ if __name__ == "__main__":
     parser.add_argument("--ntrain", "-k", type=int, default=0)
     parser.add_argument("--data_dir", "-d", type=str, default="data/MMLU")
     
-    parser.add_argument("--engine", "-e", choices=["gemma", "llamma", "qwen","llama2-7b", "llama2-13b", "llama2-70b", "llama2-7b-chat", "vicuna7b", "vicuna13b",
+    parser.add_argument("--engine", "-e", choices=["gemma", "llamma", "qwen1","qwen2","qwen3","llama2-7b", "llama2-13b", "llama2-70b", "llama2-7b-chat", "vicuna7b", "vicuna13b",
                                                    "wizard-7b", "wizard-13b", "internlm-20b", "falcon-7b", "mpt-7b"],
                         default=["llama2-7b", "llama2-13b", "vicuna7b", "vicuna13b","wizard-7b", "wizard-13b", "internlm-20b", "falcon-7b", "mpt-7b"], nargs="+")
     
