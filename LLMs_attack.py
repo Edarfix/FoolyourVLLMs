@@ -289,24 +289,23 @@ def load_model(args, engine):
         model_name = "meta-llama/Llama-3.2-1B"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
-    if engine == 'gemma':
+    elif engine == 'gemma':
         model_name = "google/gemma-3-1b-pt"
         tokenizer = GemmaTokenizer.from_pretrained(model_name)
         model = GemmaForCausalLM.from_pretrained(model_name)
-    if engine == 'qwen1':
+    elif engine == 'qwen1':
         model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
-    if engine == 'qwen2':
+    elif engine == 'qwen2':
         model_name = "Qwen/Qwen2.5-VL-3B-Instruct"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
-    if engine == 'qwen3':
+    elif engine == 'qwen3':
         model_name = "Qwen/Qwen2.5-VL-7B-Instruct"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
-
-    if engine == 'llama2-7b':
+    elif engine == 'llama2-7b':
         tokenizer = transformers.LlamaTokenizer.from_pretrained('meta-llama/Llama-2-7b-hf', load_in_8bit=args.load_in_8bit)
         model = transformers.LlamaForCausalLM.from_pretrained('meta-llama/Llama-2-7b-hf', load_in_8bit=args.load_in_8bit)
     elif engine == 'llama2-13b':
@@ -319,10 +318,8 @@ def load_model(args, engine):
         tokenizer = AutoTokenizer.from_pretrained("daryl149/llama-2-7b-chat-hf", load_in_8bit=args.load_in_8bit)
         model = AutoModelForCausalLM.from_pretrained("daryl149/llama-2-7b-chat-hf", load_in_8bit=args.load_in_8bit)
     elif engine == 'vicuna7b':
-        print('HIER I AM')
         tokenizer = transformers.AutoTokenizer.from_pretrained('lmsys/vicuna-7b-v1.5', load_in_8bit=args.load_in_8bit)
         model = transformers.AutoModelForCausalLM.from_pretrained("lmsys/vicuna-7b-v1.5", load_in_8bit=args.load_in_8bit)
-        print("LOADED")
     elif engine == 'vicuna13b':
         tokenizer = transformers.AutoTokenizer.from_pretrained('lmsys/vicuna-13b-v1.5', load_in_8bit=args.load_in_8bit)
         model = transformers.AutoModelForCausalLM.from_pretrained("lmsys/vicuna-13b-v1.5", load_in_8bit=args.load_in_8bit)
