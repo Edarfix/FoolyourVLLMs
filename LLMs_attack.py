@@ -391,9 +391,10 @@ def main(args):
         print("\n\n")
 
 if __name__ == "__main__":
-    print(torch.cuda.is_available())
     print(torch.__version__)  # Check PyTorch version
-    print(torch.version.cuda)
+    print(torch.cuda.is_available())  # Doit afficher True
+    print(torch.version.cuda)  # Doit afficher une version de CUDA
+    print(torch.cuda.get_device_name(0))  # Doit afficher le nom de votre GPU
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", "-k", type=int, default=0)
     parser.add_argument("--data_dir", "-d", type=str, default="data/MMLU")
