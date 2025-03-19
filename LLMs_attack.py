@@ -9,8 +9,7 @@ from torch.nn.functional import softmax
 import random
 import math
 import itertools
-from transformers import AutoTokenizer, AutoModelForCausalLM
-
+from transformers import AutoTokenizer, AutoModelForCausalLM,GemmaForCausalLM, GemmaTokenizer
 
 choices = ["A", "B", "C", "D"]
 
@@ -292,8 +291,8 @@ def load_model(args, engine):
         model = AutoModelForCausalLM.from_pretrained(model_name)
     if engine == 'gemma':
         model_name = "google/gemma-3-1b-pt"
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name)
+        tokenizer = GemmaTokenizer.from_pretrained(model_name)
+        model = GemmaForCausalLM.from_pretrained(model_name)
     if engine == 'qwen':
         model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
