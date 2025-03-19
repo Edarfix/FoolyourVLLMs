@@ -286,6 +286,11 @@ def eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=0, permute_
 
 
 def load_model(args, engine):
+    print('HIER WE GO', engine, args)
+    if engine == 'qwen':
+        model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name)
     if engine == 'llama2-7b':
         tokenizer = transformers.LlamaTokenizer.from_pretrained('meta-llama/Llama-2-7b-hf', load_in_8bit=args.load_in_8bit)
         model = transformers.LlamaForCausalLM.from_pretrained('meta-llama/Llama-2-7b-hf', load_in_8bit=args.load_in_8bit)
@@ -299,8 +304,10 @@ def load_model(args, engine):
         tokenizer = AutoTokenizer.from_pretrained("daryl149/llama-2-7b-chat-hf", load_in_8bit=args.load_in_8bit)
         model = AutoModelForCausalLM.from_pretrained("daryl149/llama-2-7b-chat-hf", load_in_8bit=args.load_in_8bit)
     elif engine == 'vicuna7b':
+        print('HIER I AM')
         tokenizer = transformers.AutoTokenizer.from_pretrained('lmsys/vicuna-7b-v1.5', load_in_8bit=args.load_in_8bit)
         model = transformers.AutoModelForCausalLM.from_pretrained("lmsys/vicuna-7b-v1.5", load_in_8bit=args.load_in_8bit)
+        print("LOADED")
     elif engine == 'vicuna13b':
         tokenizer = transformers.AutoTokenizer.from_pretrained('lmsys/vicuna-13b-v1.5', load_in_8bit=args.load_in_8bit)
         model = transformers.AutoModelForCausalLM.from_pretrained("lmsys/vicuna-13b-v1.5", load_in_8bit=args.load_in_8bit)
@@ -381,7 +388,7 @@ if __name__ == "__main__":
     parser.add_argument("--ntrain", "-k", type=int, default=0)
     parser.add_argument("--data_dir", "-d", type=str, default="data/MMLU")
     
-    parser.add_argument("--engine", "-e", choices=["llama2-7b", "llama2-13b", "llama2-70b", "llama2-7b-chat", "vicuna7b", "vicuna13b",
+    parser.add_argument("--engine", "-e", choices=["qwen","llama2-7b", "llama2-13b", "llama2-70b", "llama2-7b-chat", "vicuna7b", "vicuna13b",
                                                    "wizard-7b", "wizard-13b", "internlm-20b", "falcon-7b", "mpt-7b"],
                         default=["llama2-7b", "llama2-13b", "vicuna7b", "vicuna13b","wizard-7b", "wizard-13b", "internlm-20b", "falcon-7b", "mpt-7b"], nargs="+")
     
