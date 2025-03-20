@@ -285,24 +285,16 @@ def eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=0, permute_
 
 
 def load_model(args, engine):
-    if engine == 'llama':
-        model_name = "meta-llama/Llama-3.2-1B"
+    if engine == "llama-3b":
+        model_name = "meta-llama/Llama-3.2-3B-Instruct"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
-    elif engine == 'gemma':
-        model_name = "google/gemma-3-1b-pt"
-        tokenizer = GemmaTokenizer.from_pretrained(model_name)
-        model = GemmaForCausalLM.from_pretrained(model_name)
     elif engine == 'qwen1':
         model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
-    elif engine == 'qwen2':
-        model_name = "Qwen/Qwen2.5-VL-3B-Instruct"
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name)
-    elif engine == 'qwen3':
-        model_name = "Qwen/Qwen2.5-VL-7B-Instruct"
+    elif engine == 'mistral-7b':
+        model_name = "mistralai/Mistral-7B-Instruct-v0.3"
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name)
     elif engine == 'llama2-7b':
@@ -399,7 +391,7 @@ def main(args):
         torch.cuda.empty_cache()
         print("\n\n")
         
-        return accuracy_dic
+    return accuracy_dic
 
 if __name__ == "__main__":
     print(torch.__version__)  # Check PyTorch version
@@ -410,7 +402,7 @@ if __name__ == "__main__":
     parser.add_argument("--ntrain", "-k", type=int, default=0)
     parser.add_argument("--data_dir", "-d", type=str, default="data/MMLU")
     
-    parser.add_argument("--engine", "-e", choices=["gemma", "llamma", "qwen1","qwen2","qwen3","llama2-7b", "llama2-13b", "llama2-70b", "llama2-7b-chat", "vicuna7b", "vicuna13b",
+    parser.add_argument("--engine", "-e", choices=["mistral-7b", "llama-3b", "qwen1","llama2-7b", "llama2-13b", "llama2-70b", "llama2-7b-chat", "vicuna7b", "vicuna13b",
                                                    "wizard-7b", "wizard-13b", "internlm-20b", "falcon-7b", "mpt-7b"],
                         default=["llama2-7b", "llama2-13b", "vicuna7b", "vicuna13b","wizard-7b", "wizard-13b", "internlm-20b", "falcon-7b", "mpt-7b"], nargs="+")
     
