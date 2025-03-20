@@ -375,6 +375,7 @@ def main(args):
         subjects =  subjects[:args.subset_subjects]
     accuracy_dic = {}
     avg_dic = {}
+    cors_dic = {}
     
     print(subjects)
     print(args)
@@ -416,6 +417,7 @@ def main(args):
                 all_accs.append(acc)
         
         accuracy_dic[engine] = all_accs
+        cors_dic[engine] = all_cors
         if args.permutation_attack:
             avg_dic[engine] = all_avg
         
@@ -436,7 +438,7 @@ def main(args):
         torch.cuda.empty_cache()
         print("\n\n")
         
-    return accuracy_dic, avg_dic
+    return accuracy_dic, cors_dic, avg_dic
 
 if __name__ == "__main__":
     print(torch.__version__)  # Check PyTorch version
