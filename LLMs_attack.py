@@ -187,7 +187,13 @@ def full_search_eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced
     answers = choices[:num_choices]
     device = model.device
     all_preds, all_gt = [], []
+    if args.stop_attack == False:
+        avg_results = []
+    
     for i in range(test_df.shape[0]):
+        if args.verbose == True:
+            print("#####################################################################")
+            print("Question: ", test_df.iloc[i, 0])
         corr = 1
         if args.reduce_attack:
             total_perms = len(generate_permutation_indices(num_choices, n_reduced, original_label_idx=ord(test_df.iloc[i, test_df.shape[1]-1]) - ord('A')))
@@ -195,11 +201,18 @@ def full_search_eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced
             total_perms = math.factorial(num_choices)
         right_wrong = []
         for perm_i in range(total_perms):
+            if args.verbose == True:
+                print("Permutation: ", perm_i)
             k = args.ntrain
             prompt_end, new_label = format_example(args, test_df, i, n_reduced=n_reduced, 
                                                    include_answer=False, permute_pos=permute_pos, perm_i=perm_i)
             train_prompt = gen_prompt(args, dev_df, subject, k, n_reduced=n_reduced)
             prompt = train_prompt + prompt_end
+            
+            if args.verbose == True:
+                print()
+                print("Prompt: ", prompt)
+                print()
             
             label = new_label
 
@@ -219,22 +232,35 @@ def full_search_eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced
                 
             pred = {0: "A", 1: "B", 2: "C", 3: "D"}[np.argmax(lprobs)]
             
+            if args.verbose == True:
+                print("Predicted: ", pred)
+                print("True: ", label)
+                print("Probabilities: ", lprobs)
+                print()
+            
             all_preds.append(pred)
             all_gt.append(label)
 
             cor = pred == label
             right_wrong.append(cor)
+            
             if cor == False:
                 corr = 0
-                break
+                if args.stop_attack:
+                    break
         cors.append(corr)
-    
+        if args.verbose == True:
+            print("#####################################################################")
+            print("Proportion of correct permutations: ", np.mean(right_wrong))
+        if args.stop_attack == False:
+            avg_results.append(np.mean(right_wrong))
     acc = np.mean(cors)
     cors = np.array(cors)
+    avg = np.array(avg_results)
     
     print("Average accuracy {:.2f} - {}".format(acc*100, subject))
     
-    return cors, acc
+    return cors, acc, avg
 
 def eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=0, permute_pos=None):
     cors = []
@@ -249,6 +275,10 @@ def eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=0, permute_
         prompt_end, new_label = format_example(args, test_df, i, n_reduced=n_reduced, include_answer=False, permute_pos=permute_pos)
         train_prompt = gen_prompt(args, dev_df, subject, k, n_reduced=n_reduced)
         prompt = train_prompt + prompt_end
+        if args.verbose == True:
+            print()
+            print("Prompt: ", prompt)
+            print()
         
         label = new_label
 
@@ -263,7 +293,7 @@ def eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=0, permute_
             output = model(input_ids)
         logits = output.logits
         token_probs = softmax(logits[0, -1, :], dim=-1)
-
+        
         lprobs = []
         for ans in answers:
             ans_id = tokenizer(ans, add_special_tokens=False, return_tensors="pt").input_ids[0].item()
@@ -272,6 +302,12 @@ def eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=0, permute_
         pred = {0: "A", 1: "B", 2: "C", 3: "D"}[np.argmax(lprobs)]
         all_preds.append(pred)
         all_gt.append(label)
+        
+        if args.verbose == True:
+            print("Predicted: ", pred)
+            print("True: ", label)
+            print("Probabilities: ", lprobs)
+            print()
 
         cor = pred == label
         cors.append(cor)
@@ -335,8 +371,10 @@ def load_model(args, engine):
 def main(args):
     engines = args.engine
     subjects = sorted([f.split("_test.csv")[0] for f in os.listdir(os.path.join(args.data_dir, "test")) if "_test.csv" in f])
-
+    if args.subset_subjects != None:
+        subjects =  subjects[:args.subset_subjects]
     accuracy_dic = {}
+    avg_dic = {}
     
     print(subjects)
     print(args)
@@ -344,6 +382,7 @@ def main(args):
     for engine in engines:
         all_cors = []
         all_accs = []
+        all_avg = []
         print("=====================================")
         print("Engine: {}".format(engine))
         print("=====================================")
@@ -354,11 +393,15 @@ def main(args):
             dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[:args.ntrain]
             test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
             if args.use_subset:
-                test_df = test_df[:3]
+                if args.subset_size is not None:
+                    test_df = test_df[:args.subset_size]
+                else:
+                    test_df = test_df[:100]
             
             if args.permutation_attack or args.reduce_attack:
-                cors, acc = full_search_eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=args.n_reduced)
+                cors, acc, avg = full_search_eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=args.n_reduced)
                 all_cors.append(cors)
+                all_avg.append(avg)
 
             elif args.position_permute:
                 tmp_acc = {i: 0 for i in ['A', 'B', 'C', 'D']}
@@ -373,6 +416,8 @@ def main(args):
                 all_accs.append(acc)
         
         accuracy_dic[engine] = all_accs
+        if args.permutation_attack:
+            avg_dic[engine] = all_avg
         
         if not args.position_permute:
             weighted_acc = np.mean(np.concatenate(all_cors))
@@ -391,7 +436,7 @@ def main(args):
         torch.cuda.empty_cache()
         print("\n\n")
         
-    return accuracy_dic
+    return accuracy_dic, avg_dic
 
 if __name__ == "__main__":
     print(torch.__version__)  # Check PyTorch version
