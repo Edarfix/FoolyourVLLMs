@@ -344,6 +344,8 @@ def main(args):
     engines = args.engine
     subjects = sorted([f.split("_test.csv")[0] for f in os.listdir(os.path.join(args.data_dir, "test")) if "_test.csv" in f])
 
+    accuracy_dic = {}
+    
     print(subjects)
     print(args)
 
@@ -360,7 +362,7 @@ def main(args):
             dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[:args.ntrain]
             test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
             if args.use_subset:
-                test_df = test_df[:100]
+                test_df = test_df[:10]
             
             if args.permutation_attack or args.reduce_attack:
                 cors, acc = full_search_eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=args.n_reduced)
@@ -377,7 +379,9 @@ def main(args):
                 cors, acc = eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced=args.n_reduced)
                 all_cors.append(cors)
                 all_accs.append(acc)
-            
+        
+        accuracy_dic[engine] = all_accs
+        
         if not args.position_permute:
             weighted_acc = np.mean(np.concatenate(all_cors))
             print("Average accuracy: {:.2f}".format(weighted_acc*100))
@@ -394,6 +398,8 @@ def main(args):
         del tokenizer
         torch.cuda.empty_cache()
         print("\n\n")
+        
+        return accuracy_dic
 
 if __name__ == "__main__":
     print(torch.__version__)  # Check PyTorch version
