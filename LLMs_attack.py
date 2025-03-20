@@ -187,8 +187,7 @@ def full_search_eval(args, subject, dev_df, test_df, model, tokenizer, n_reduced
     answers = choices[:num_choices]
     device = model.device
     all_preds, all_gt = [], []
-    if args.stop_attack == False:
-        avg_results = []
+    avg_results = []
     
     for i in range(test_df.shape[0]):
         if args.verbose == True:
